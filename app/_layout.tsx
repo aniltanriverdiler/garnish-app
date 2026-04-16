@@ -42,13 +42,13 @@ export default Sentry.wrap(function RootLayout() {
 
   useEffect(() => {
     fetchAuthenticatedUser();
-  });
+  }, [fetchAuthenticatedUser]);
 
-  if (!fontsLoaded && !isLoading) {
-    return null;
-  }
+  useEffect(() => {
+    Sentry.showFeedbackWidget();
+  }, []);
+
+  if (!fontsLoaded && isLoading) return null;
 
   return <Stack screenOptions={{ headerShown: false }} />;
 });
-
-Sentry.showFeedbackWidget();
