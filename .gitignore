@@ -1,25 +1,57 @@
+# Dependencies
 node_modules/
+
+# Expo
 .expo/
 dist/
+web-build/
+
+# Native builds
+ios/
+android/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Debug
 npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Metro
+.metro-health-check*
+
+# Expo generated
+expo-env.d.ts
+
+# Turbo
+.turbo/
+
+# Build outputs
+dist/
+build/
+
+# Prisma
+apps/api/prisma/*.db
+
+# Keystores and certificates
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
-# expo router
-expo-env.d.ts
-.env
 
-
-ios
-android
-
-# macOS
-.DS_Store
-
-# Temporary files created by Metro to check the health of the file watcher
-.metro-health-check*
-.env.local
+# Lock files (keep only package-lock.json)
+bun.lock
