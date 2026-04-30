@@ -2,6 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+import path from "path";
 import { env } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
@@ -16,7 +17,11 @@ import addressesRouter from "./modules/addresses/addresses.route";
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 app.use(
   cors({
     origin: env.CORS_ORIGIN === "*" ? "*" : env.CORS_ORIGIN.split(","),
@@ -25,6 +30,13 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  "/images",
+  express.static(path.join(__dirname, "../public/images"), {
+    maxAge: "7d",
+  })
+);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,

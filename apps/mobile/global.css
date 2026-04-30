@@ -54,7 +54,7 @@
   }
 
   .filter {
-    @apply mr-2 rounded-full px-6 py-3 shadow-sm shadow-black/10;
+    @apply mr-2 rounded-full px-6 py-3 shadow-lg shadow-black/70;
   }
 
   .menu-card {
@@ -70,7 +70,7 @@
   }
 
   .searchbar {
-    @apply font-quicksand-medium text-dark-100 relative flex w-full flex-row items-center justify-center gap-5 rounded-full  bg-white shadow-md shadow-black/10;
+    @apply font-quicksand-medium text-dark-100 relative flex w-full flex-row items-center justify-center gap-5 rounded-full  bg-white shadow-lg shadow-black/70;
   }
 
   .tab-icon {
