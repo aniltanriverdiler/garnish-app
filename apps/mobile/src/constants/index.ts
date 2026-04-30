@@ -21,25 +21,42 @@ import user from '@assets/icons/user.png';
 
 import avatar from '@assets/images/avatar.png';
 import avocado from '@assets/images/avocado.png';
-import bacon from '@assets/images/bacon.png';
 import burgerOne from '@assets/images/burger-one.png';
 import burgerTwo from '@assets/images/burger-two.png';
 import buritto from '@assets/images/buritto.png';
 import cheese from '@assets/images/cheese.png';
 import coleslaw from '@assets/images/coleslaw.png';
-import cucumber from '@assets/images/cucumber.png';
 import emptyState from '@assets/images/empty-state.png';
 import fries from '@assets/images/fries.png';
 import loginGraphic from '@assets/images/login-graphic.png';
 import logo from '@assets/images/logo.png';
-import mozarellaSticks from '@assets/images/mozarella-sticks.png';
 import mushrooms from '@assets/images/mushrooms.png';
-import onionRings from '@assets/images/onion-rings.png';
 import onions from '@assets/images/onions.png';
+import pickles from '@assets/images/pickles.png';
 import pizzaOne from '@assets/images/pizza-one.png';
+import pringles from '@assets/images/pringles.png';
+import mozz from '@assets/images/mozz.png';
+import bacons from '@assets/images/bacons.png';
 import salad from '@assets/images/salad.png';
 import success from '@assets/images/success.png';
 import tomatoes from '@assets/images/tomatoes.png';
+
+import type { ImageSourcePropType } from 'react-native';
+
+export const OPTION_IMAGE_MAP: Record<string, ImageSourcePropType> = {
+  Tomato: tomatoes,
+  Onions: onions,
+  Cheese: cheese,
+  Bacon: bacons,
+  Pickles: pickles,
+  Mushroom: mushrooms,
+  Avocado: avocado,
+  Fries: fries,
+  Coleslaw: coleslaw,
+  Salad: salad,
+  Pringles: pringles,
+  Mozz: mozz,
+};
 
 export const CATEGORIES = [
   { id: '1', name: 'All' },
@@ -58,17 +75,17 @@ export const offers = [
 
 export const sides = [
   { name: 'Fries', image: fries, price: 3.5 },
-  { name: 'Onion Rings', image: onionRings, price: 4.0 },
-  { name: 'Mozarella Sticks', image: mozarellaSticks, price: 5.0 },
+  { name: 'Onion Rings', image: onions, price: 4.0 },
+  { name: 'Mozarella Sticks', image: mozz, price: 5.0 },
   { name: 'Coleslaw', image: coleslaw, price: 2.5 },
   { name: 'Salad', image: salad, price: 4.5 },
 ];
 
 export const toppings = [
   { name: 'Avocado', image: avocado, price: 1.5 },
-  { name: 'Bacon', image: bacon, price: 2.0 },
+  { name: 'Bacon', image: bacons, price: 2.0 },
   { name: 'Cheese', image: cheese, price: 1.0 },
-  { name: 'Cucumber', image: cucumber, price: 0.5 },
+  { name: 'Pickles', image: pickles, price: 0.5 },
   { name: 'Mushrooms', image: mushrooms, price: 1.2 },
   { name: 'Onions', image: onions, price: 0.5 },
   { name: 'Tomatoes', image: tomatoes, price: 0.7 },
@@ -77,22 +94,22 @@ export const toppings = [
 export const images = {
   avatar,
   avocado,
-  bacon,
+  bacons,
   burgerOne,
   burgerTwo,
   buritto,
   cheese,
   coleslaw,
-  cucumber,
   emptyState,
   fries,
   loginGraphic,
   logo,
-  mozarellaSticks,
+  mozz,
   mushrooms,
-  onionRings,
   onions,
+  pickles,
   pizzaOne,
+  pringles,
   salad,
   success,
   tomatoes,

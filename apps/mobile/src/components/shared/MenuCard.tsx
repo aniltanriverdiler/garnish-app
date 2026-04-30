@@ -1,11 +1,15 @@
 import { Text, TouchableOpacity, Image, Platform } from 'react-native';
 import type { Product } from '@garnish/shared';
+import { router } from 'expo-router';
 
-const MenuCard = ({ item: { name, image, price } }: { item: Product }) => {
+const MenuCard = ({ item }: { item: Product }) => {
+  const { id, name, image, price } = item;
+
   return (
     <TouchableOpacity
       className="menu-card"
-      style={Platform.OS === 'android' ? { elevation: 10, shadowColor: '#878787' } : {}}>
+      style={Platform.OS === 'android' ? { elevation: 10, shadowColor: '#878787' } : {}}
+      onPress={() => router.push({ pathname: '/product/[id]', params: { id } })}>
       <Image
         source={{ uri: image }}
         className="absolute -top-10 size-32 rounded-lg"

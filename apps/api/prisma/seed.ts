@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, OptionType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -217,7 +217,45 @@ async function main() {
     });
   }
 
-  console.log(`Seeded: 1 restaurant, 6 categories, ${products.length} products`);
+  const toppingDefs = [
+    { name: "Tomato", price: 0.7 },
+    { name: "Onions", price: 0.5 },
+    { name: "Cheese", price: 1.0 },
+    { name: "Bacon", price: 2.0 },
+    { name: "Pickles", price: 0.5 },
+    { name: "Mushroom", price: 1.2 },
+    { name: "Avocado", price: 1.5 },
+  ];
+
+  const sideDefs = [
+    { name: "Fries", price: 3.5 },
+    { name: "Coleslaw", price: 2.5 },
+    { name: "Salad", price: 4.5 },
+    { name: "Pringles", price: 3.0 },
+    { name: "Mozz", price: 5.0 },
+  ];
+
+  const createdProducts = await prisma.product.findMany({
+    where: { restaurantId: restaurant.id },
+    select: { id: true },
+  });
+
+  for (const product of createdProducts) {
+    for (const t of toppingDefs) {
+      await prisma.productOption.create({
+        data: { productId: product.id, name: t.name, price: t.price, type: OptionType.TOPPING },
+      });
+    }
+    for (const s of sideDefs) {
+      await prisma.productOption.create({
+        data: { productId: product.id, name: s.name, price: s.price, type: OptionType.SIDE },
+      });
+    }
+  }
+
+  console.log(
+    `Seeded: 1 restaurant, 6 categories, ${products.length} products, ${createdProducts.length * (toppingDefs.length + sideDefs.length)} options`
+  );
 }
 
 main()
