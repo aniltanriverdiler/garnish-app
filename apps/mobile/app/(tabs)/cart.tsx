@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import useCartStore from '@/store/cart-store';
@@ -7,6 +7,9 @@ import CartItem from '@/components/shared/CartItem';
 import { images } from '@/constants';
 import cn from 'clsx';
 import { PaymentInfoStripeProps } from '@/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { PaymentMethod } from '@garnish/shared';
+import { orderService, addressService } from '@/services';
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfoStripeProps) => (
   <View className="flex-between my-1.5 flex-row">
@@ -16,13 +19,67 @@ const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfo
 );
 
 export default function Cart() {
-  const { items, getTotalItems, getTotalPrice } = useCartStore();
+  const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore();
 
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
   const deliveryFee = 0;
   const discount = totalItems > 0 ? +(totalPrice * 0.1).toFixed(2) : 0;
   const total = +(totalPrice + deliveryFee - discount).toFixed(2);
+
+  // Get addresses from the API
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: addressService.getAddresses,
+  });
+
+  // Get the default address or the first address
+  const selectedAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: orderService.createOrder,
+    onSuccess: () => {
+      clearCart();
+      Alert.alert('Success', 'Your order has been created.');
+      router.push('/');
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Order could not be created';
+      Alert.alert('Error', message);
+    },
+  });
+
+  // Handle order creation
+  const handleOrderNow = () => {
+    if (items.length === 0) {
+      Alert.alert('Error', 'Your cart is empty.');
+      return;
+    }
+
+    if (!selectedAddress) {
+      Alert.alert('Error', 'Please add a delivery address first');
+      return;
+    }
+
+    const restaurantIds = [...new Set(items.map((item) => item.restaurantId))];
+
+    if (restaurantIds.length > 1) {
+      Alert.alert('Error', 'You can only order from one restaurant at a time');
+      return;
+    }
+
+    createOrderMutation.mutate({
+      restaurantId: restaurantIds[0],
+      deliveryAddressId: selectedAddress.id,
+      paymentMethod: PaymentMethod.CASH,
+      items: items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        options: item.options ?? [],
+      })),
+    });
+  };
 
   const listHeader = (
     <View className="mb-4 gap-5">
@@ -81,7 +138,11 @@ export default function Cart() {
           />
         </View>
 
-        <CustomButton title="Order Now" />
+        <CustomButton
+          title="Order Now"
+          onPress={handleOrderNow}
+          isLoading={createOrderMutation.isPending}
+        />
       </View>
     ) : null;
 

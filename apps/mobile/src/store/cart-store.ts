@@ -9,6 +9,8 @@ interface CartItemOption {
 
 interface CartItem {
   id: string;
+  productId: string;
+  restaurantId: string;
   name: string;
   price: number;
   image: string;
@@ -35,7 +37,9 @@ const useCartStore = create<CartState>((set, get) => ({
       const existing = state.items.find((i) => i.id === item.id);
       if (existing) {
         return {
-          items: state.items.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i)),
+          items: state.items.map((i) =>
+            i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          ),
         };
       }
       return { items: [...state.items, { ...item, quantity: 1 }] };

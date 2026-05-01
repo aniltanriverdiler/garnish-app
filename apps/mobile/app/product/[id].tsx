@@ -87,9 +87,12 @@ const ProductDetailsScreen = () => {
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.id,
+        productId: product.id,
+        restaurantId: product.restaurantId,
         name: product.name,
         price: product.price,
         image: product.image,
+        options: [],
       });
     }
     Alert.alert('Added to cart', `${quantity}x ${product.name}`);
