@@ -97,7 +97,7 @@ const ProductDetailsScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1 px-5" contentContainerClassName="pb-32">
+      <ScrollView className="flex-1 px-5" contentContainerClassName="pb-12">
         {/* Header */}
         <View className="flex-row items-center justify-between">
           <TouchableOpacity onPress={() => router.back()}>
