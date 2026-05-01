@@ -26,12 +26,10 @@ const OptionCard = ({ option }: { option: ProductOption }) => {
       className="mr-3 w-20 overflow-hidden rounded-2xl"
       style={Platform.OS === 'android' ? { elevation: 4, shadowColor: '#000' } : {}}>
       <View className="h-16 items-center justify-center bg-white">
-        {localImage && (
-          <Image source={localImage} className="h-12 w-12" resizeMode="contain" />
-        )}
+        {localImage && <Image source={localImage} className="h-12 w-12" resizeMode="contain" />}
       </View>
-      <View className="bg-dark-100 flex-row items-center justify-between px-2 py-1.5">
-        <Text className="font-quicksand-medium flex-1 text-xs text-white" numberOfLines={1}>
+      <View className="flex-row items-center justify-between bg-dark-100 px-2 py-1.5">
+        <Text className="flex-1 font-quicksand-medium text-xs text-white" numberOfLines={1}>
           {option.name}
         </Text>
         <TouchableOpacity className="ml-1 size-5 items-center justify-center rounded-full bg-red-500">
@@ -166,11 +164,11 @@ const ProductDetailsScreen = () => {
         </View>
 
         {/* Delivery Info Bar */}
-        <View className="mx-1 my-5 flex-row items-center justify-between rounded-full bg-white px-5 py-4 shadow-sm shadow-black/10">
+        <View className="mx-1 my-5 flex-row items-center justify-between rounded-full bg-[#FE8C000D] px-5 py-4 shadow-sm shadow-black/10">
           <View className="flex-row items-center justify-center gap-2">
             <Image
               source={images.dollar}
-              className="size-4"
+              className="size-6"
               resizeMode="contain"
               tintColor="#FE8C00"
             />
@@ -188,7 +186,7 @@ const ProductDetailsScreen = () => {
           <View className="flex-row items-center justify-center gap-2">
             <Image
               source={images.star}
-              className="size-4"
+              className="size-5"
               resizeMode="contain"
               tintColor="#FE8C00"
             />
@@ -230,21 +228,21 @@ const ProductDetailsScreen = () => {
 
       {/* Bottom Bar */}
       <View
-        className="bg-white px-5 py-4 shadow-lg shadow-black/10"
+        className="mx-7 mb-3 rounded-2xl bg-white px-5 py-4 shadow-md shadow-black/55"
         style={Platform.OS === 'android' ? { elevation: 10 } : {}}>
         <View className="flex-row items-center justify-between">
           {/* Quantity Selector */}
-          <View className="flex-row items-center gap-5">
+          <View className="flex-row items-center gap-3">
             <TouchableOpacity
-              className="size-9 items-center justify-center rounded-full border border-gray-200"
+              className="size-9 items-center justify-center rounded-xl border border-gray-50 bg-[#FE8C00]/15"
               onPress={() => setQuantity((q) => Math.max(1, q - 1))}>
               <Image source={images.minus} className="size-4" resizeMode="contain" />
             </TouchableOpacity>
-            <Text className="font-quicksand-bold w-6 text-center text-xl text-dark-100">
+            <Text className="w-6 text-center font-quicksand-bold text-xl text-dark-100">
               {quantity}
             </Text>
             <TouchableOpacity
-              className="size-9 items-center justify-center rounded-full border border-gray-200"
+              className="size-9 items-center justify-center rounded-xl border border-gray-50 bg-[#FE8C00]/15"
               onPress={() => setQuantity((q) => q + 1)}>
               <Image source={images.plus} className="size-4" resizeMode="contain" />
             </TouchableOpacity>
@@ -252,7 +250,7 @@ const ProductDetailsScreen = () => {
 
           {/* Add to Cart Button */}
           <TouchableOpacity
-            className="bg-primary flex-row items-center gap-3 rounded-full px-6 py-3"
+            className="flex-row items-center gap-3 rounded-full bg-primary px-6 py-3"
             onPress={handleAddToCart}>
             <Image source={images.bag} className="size-5" tintColor="white" resizeMode="contain" />
             <Text className="font-quicksand-bold text-base text-white">
