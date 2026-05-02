@@ -23,11 +23,13 @@ export async function login(email: string, password: string): Promise<AuthRespon
 export async function register(
   name: string,
   email: string,
+  phone: string,
   password: string
 ): Promise<AuthResponse> {
   const { data } = await apiClient.post<ApiResponse<AuthResponse>>(API_ROUTES.AUTH.REGISTER, {
     name,
     email,
+    phone,
     password,
   });
 

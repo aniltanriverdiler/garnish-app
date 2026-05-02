@@ -19,6 +19,7 @@ export async function registerUser(input: RegisterInput) {
     data: {
       name: input.name,
       email: input.email,
+      phone: input.phone,
       password: hashedPassword,
     },
     select: {

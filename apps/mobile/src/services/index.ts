@@ -3,3 +3,4 @@ export * as authService from './auth.service';
 export * as productService from './product.service';
 export * as orderService from './order.service';
 export * as addressService from './address.service';
+export * as userService from './user.service';

@@ -9,22 +9,23 @@ import * as Sentry from '@sentry/react-native';
 
 const SignUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
   const { setIsAuthenticated, setUser } = useAuthStore();
 
   const submit = async () => {
-    const { name, email, password } = form;
+    const { name, email, phone, password } = form;
 
-    if (!name || !email || !password)
+    if (!name || !email || !phone || !password)
       return Alert.alert('Error', 'Please enter valid name, email address & password.');
 
     setIsSubmitting(true);
 
     try {
-      const { user } = await authService.register(name, email, password);
+      const { user } = await authService.register(name, email, phone, password);
       setUser(user);
       setIsAuthenticated(true);
-      router.replace('/');
+      Alert.alert('Success', 'Account created. Please sign in.');
+      router.replace('/sign-in');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'An error occurred';
       Alert.alert('Error', message);
@@ -48,6 +49,13 @@ const SignUp = () => {
         onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
         label="Email"
         keyboardType="email-address"
+      />
+      <CustomInput
+        placeholder="Enter your phone number"
+        value={form.phone}
+        onChangeText={(text) => setForm((prev) => ({ ...prev, phone: text }))}
+        label="Phone Number"
+        keyboardType="phone-pad"
       />
       <CustomInput
         placeholder="Enter your password"

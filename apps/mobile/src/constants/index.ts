@@ -19,7 +19,7 @@ import star from '@assets/icons/star.png';
 import trash from '@assets/icons/trash.png';
 import user from '@assets/icons/user.png';
 
-import avatar from '@assets/images/avatar.png';
+import avatar from '@assets/images/anil.jpg';
 import avocado from '@assets/images/avocado.png';
 import burgerOne from '@assets/images/burger-one.png';
 import burgerTwo from '@assets/images/burger-two.png';

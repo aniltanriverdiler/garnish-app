@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
 });
 
 export default Sentry.wrap(function RootLayout() {
-  const { isLoading, fetchAuthenticatedUser } = useAuthStore();
+  const { isLoading } = useAuthStore();
 
   const [fontsLoaded, error] = useFonts({
     'Quicksand-Bold': require('../assets/fonts/Quicksand-Bold.ttf'),
@@ -39,10 +39,6 @@ export default Sentry.wrap(function RootLayout() {
     if (error) throw error;
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
-
-  useEffect(() => {
-    fetchAuthenticatedUser();
-  }, [fetchAuthenticatedUser]);
 
   if (!fontsLoaded && isLoading) return null;
 

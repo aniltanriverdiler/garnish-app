@@ -11,6 +11,7 @@ export const registerSchema = z.object({
     .min(2, "İsim en az 2 karakter olmalıdır")
     .max(50, "İsim en fazla 50 karakter olabilir"),
   email: z.string().email("Geçerli bir e-posta adresi giriniz"),
+  phone: z.string().min(7, "Telefon numarası geçerli olmalıdır"),
   password: z
     .string()
     .min(6, "Şifre en az 6 karakter olmalıdır")
