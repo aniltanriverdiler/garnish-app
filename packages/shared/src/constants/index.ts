@@ -30,7 +30,6 @@ export const API_ROUTES = {
     ADD: "/cart/add",
     UPDATE: "/cart/update",
     REMOVE: (id: string) => `/cart/${id}`,
-    CLEAR: "/cart/clear",
   },
   ORDERS: {
     BASE: "/orders",

@@ -1,5 +1,13 @@
+/**
+ * Ortam değişkenlerinin tip-güvenli doğrulamasını yapan dosya.
+ * Uygulama başlatılırken .env dosyasındaki değerler Zod şeması ile parse edilir.
+ * Eksik veya hatalı değişken varsa uygulama hemen durur — runtime'da sürpriz hata önlenir.
+ * Tüm backend dosyaları env değerlerine bu modül üzerinden erişir.
+ */
+
 import { z } from "zod";
 
+// Defines the expected shape and defaults for all environment variables
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
@@ -13,6 +21,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("*"),
 });
 
+// Fail fast if any required variable is missing
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {

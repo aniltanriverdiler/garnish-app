@@ -10,39 +10,53 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getProductById } from '@/services/product.service';
 import useCartStore from '@/store/cart-store';
 import { images, OPTION_IMAGE_MAP } from '@/constants';
 import { OptionType } from '@garnish/shared';
 import type { ProductOption } from '@garnish/shared';
+import cn from 'clsx';
 
-const OptionCard = ({ option }: { option: ProductOption }) => {
+interface OptionCardProps {
+  option: ProductOption;
+  selected: boolean;
+  onToggle: (option: ProductOption) => void;
+}
+
+const OptionCard = ({ option, selected, onToggle }: OptionCardProps) => {
   const localImage = OPTION_IMAGE_MAP[option.name];
 
   return (
-    <View
+    <TouchableOpacity
+      onPress={() => onToggle(option)}
       className="mr-3 w-20 overflow-hidden rounded-2xl"
       style={Platform.OS === 'android' ? { elevation: 4, shadowColor: '#000' } : {}}>
-      <View className="h-16 items-center justify-center bg-white">
+      <View className={cn('h-16 items-center justify-center', selected ? 'bg-primary/10' : 'bg-white')}>
         {localImage && <Image source={localImage} className="h-12 w-12" resizeMode="contain" />}
       </View>
-      <View className="flex-row items-center justify-between bg-dark-100 px-2 py-1.5">
+      <View className={cn('flex-row items-center justify-between px-2 py-1.5', selected ? 'bg-primary' : 'bg-dark-100')}>
         <Text className="flex-1 font-quicksand-medium text-xs text-white" numberOfLines={1}>
           {option.name}
         </Text>
-        <TouchableOpacity className="ml-1 size-5 items-center justify-center rounded-full bg-red-500">
-          <Image source={images.plus} className="size-2.5" tintColor="white" resizeMode="contain" />
-        </TouchableOpacity>
+        <View className={cn('ml-1 size-5 items-center justify-center rounded-full', selected ? 'bg-white' : 'bg-red-500')}>
+          <Image
+            source={selected ? images.check : images.plus}
+            className="size-2.5"
+            tintColor={selected ? '#FE8C00' : 'white'}
+            resizeMode="contain"
+          />
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const ProductDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
+  const [selectedOptionIds, setSelectedOptionIds] = useState<Set<string>>(new Set());
   const { addItem } = useCartStore();
 
   const {
@@ -55,10 +69,38 @@ const ProductDetailsScreen = () => {
     enabled: !!id,
   });
 
+  const toppings = useMemo(
+    () => product?.options?.filter((o) => o.type === OptionType.TOPPING) ?? [],
+    [product]
+  );
+  const sides = useMemo(
+    () => product?.options?.filter((o) => o.type === OptionType.SIDE) ?? [],
+    [product]
+  );
+
+  const selectedOptions = useMemo(
+    () => [...toppings, ...sides].filter((o) => selectedOptionIds.has(o.id)),
+    [toppings, sides, selectedOptionIds]
+  );
+
+  const optionsPrice = useMemo(
+    () => selectedOptions.reduce((sum, o) => sum + o.price, 0),
+    [selectedOptions]
+  );
+
   const totalPrice = useMemo(() => {
     if (!product) return 0;
-    return product.price * quantity;
-  }, [product, quantity]);
+    return (product.price + optionsPrice) * quantity;
+  }, [product, quantity, optionsPrice]);
+
+  const handleToggleOption = useCallback((option: ProductOption) => {
+    setSelectedOptionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(option.id)) next.delete(option.id);
+      else next.add(option.id);
+      return next;
+    });
+  }, []);
 
   if (isLoading) {
     return (
@@ -80,19 +122,23 @@ const ProductDetailsScreen = () => {
     );
   }
 
-  const toppings = product.options?.filter((o) => o.type === OptionType.TOPPING) ?? [];
-  const sides = product.options?.filter((o) => o.type === OptionType.SIDE) ?? [];
+  const handleAddToCart = async () => {
+    const cartOptions = selectedOptions.map((o) => ({
+      optionId: o.id,
+      name: o.name,
+      price: o.price,
+      type: o.type,
+    }));
 
-  const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
-      addItem({
+      await addItem({
         id: product.id,
         productId: product.id,
         restaurantId: product.restaurantId,
         name: product.name,
         price: product.price,
         image: product.image,
-        options: [],
+        options: cartOptions,
       });
     }
     Alert.alert('Added to cart', `${quantity}x ${product.name}`);
@@ -112,7 +158,9 @@ const ProductDetailsScreen = () => {
         </View>
 
         {/* Product Name */}
-        <Text className="mb-5 mt-8 font-quicksand-bold text-2xl text-dark-100">{product.name}</Text>
+        <Text className="mb-5 mt-8 font-quicksand-bold text-2xl text-dark-100">
+          {product.name}
+        </Text>
 
         {/* Product Details */}
         <View className="flex-row items-start justify-between gap-2">
@@ -167,32 +215,17 @@ const ProductDetailsScreen = () => {
         </View>
 
         {/* Delivery Info Bar */}
-        <View className="mx-1 my-5 flex-row items-center justify-between rounded-full bg-[#FE8C000D] px-5 py-4 shadow-sm shadow-black/10">
+        <View className="mx-1 my-5 flex-row items-center justify-between rounded-full bg-white px-5 py-4 shadow-sm shadow-black/10">
           <View className="flex-row items-center justify-center gap-2">
-            <Image
-              source={images.dollar}
-              className="size-6"
-              resizeMode="contain"
-              tintColor="#FE8C00"
-            />
+            <Image source={images.dollar} className="size-4" resizeMode="contain" tintColor="#FE8C00" />
             <Text className="font-quicksand-bold text-base text-dark-100">Free Delivery</Text>
           </View>
           <View className="flex-row items-center justify-center gap-2">
-            <Image
-              source={images.clock}
-              className="size-4"
-              resizeMode="contain"
-              tintColor="#FE8C00"
-            />
+            <Image source={images.clock} className="size-4" resizeMode="contain" tintColor="#FE8C00" />
             <Text className="font-quicksand-bold text-base text-dark-100">20 - 30 mins</Text>
           </View>
           <View className="flex-row items-center justify-center gap-2">
-            <Image
-              source={images.star}
-              className="size-5"
-              resizeMode="contain"
-              tintColor="#FE8C00"
-            />
+            <Image source={images.star} className="size-4" resizeMode="contain" tintColor="#FE8C00" />
             <Text className="font-quicksand-bold text-base text-dark-100">
               {product.rating ?? '5.0'}
             </Text>
@@ -210,7 +243,12 @@ const ProductDetailsScreen = () => {
             <Text className="mb-3 font-quicksand-bold text-lg text-dark-100">Toppings</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {toppings.map((option) => (
-                <OptionCard key={option.id} option={option} />
+                <OptionCard
+                  key={option.id}
+                  option={option}
+                  selected={selectedOptionIds.has(option.id)}
+                  onToggle={handleToggleOption}
+                />
               ))}
             </ScrollView>
           </View>
@@ -222,7 +260,12 @@ const ProductDetailsScreen = () => {
             <Text className="mb-3 font-quicksand-bold text-lg text-dark-100">Side options</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {sides.map((option) => (
-                <OptionCard key={option.id} option={option} />
+                <OptionCard
+                  key={option.id}
+                  option={option}
+                  selected={selectedOptionIds.has(option.id)}
+                  onToggle={handleToggleOption}
+                />
               ))}
             </ScrollView>
           </View>

@@ -1,162 +1,221 @@
 # Garnish App
 
-A food ordering mobile application built with a monorepo architecture.
+A full-stack food ordering mobile application built with React Native (Expo) and Express.js. Uses PostgreSQL with Prisma ORM for data persistence and a monorepo architecture with a shared type/schema package.
+
+> **Türkçe dokümantasyon için:** [READMETR.md](./READMETR.md)
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Mobile** | Expo, React Native, TypeScript, Expo Router, NativeWind/Tailwind, Zustand, TanStack Query, Axios |
-| **API** | Express 5, TypeScript, Prisma, PostgreSQL, JWT, Zod, Helmet, CORS |
-| **Shared** | TypeScript types, Zod schemas, enums, constants |
-| **Tooling** | npm workspaces, Turborepo, ESLint, Prettier |
+| **Mobile** | React Native, Expo, Expo Router |
+| **Styling** | NativeWind v4, Tailwind CSS |
+| **State** | Zustand (client), TanStack React Query (server) |
+| **API Client** | Axios with interceptors |
+| **Backend** | Express.js 5, TypeScript |
+| **Database** | PostgreSQL, Prisma ORM |
+| **Auth** | JWT (access + refresh tokens) |
+| **Validation** | Zod (shared schemas) |
+| **Monitoring** | Sentry |
 
-## Project Structure
+---
+
+## Monorepo Structure
 
 ```
 garnish-app/
 ├── apps/
-│   ├── mobile/          # Expo React Native app
-│   │   ├── app/         # Expo Router file-based routing
-│   │   ├── src/         # Application source code
-│   │   │   ├── components/
-│   │   │   │   ├── ui/        # Design system primitives
-│   │   │   │   └── shared/    # App-level shared components
-│   │   │   ├── constants/     # Static data, image imports
-│   │   │   ├── features/      # Feature-based modules
-│   │   │   ├── hooks/         # Custom hooks
-│   │   │   ├── services/      # API client and service layer
-│   │   │   ├── store/         # Zustand stores
-│   │   │   ├── theme/         # Design tokens (colors, spacing, typography)
-│   │   │   ├── types/         # TypeScript types
-│   │   │   └── utils/         # Utility functions
-│   │   └── assets/      # Fonts, icons, images
-│   └── api/             # Express REST API
-│       ├── src/
-│       │   ├── config/        # Environment config
-│       │   ├── libs/          # Prisma client
-│       │   ├── middlewares/   # Auth, error, validation
-│       │   ├── modules/       # Feature modules
-│       │   │   ├── auth/
-│       │   │   ├── users/
-│       │   │   ├── restaurants/
-│       │   │   ├── categories/
-│       │   │   ├── products/
-│       │   │   ├── cart/
-│       │   │   ├── orders/
-│       │   │   └── addresses/
-│       │   └── utils/         # JWT, password, API errors
-│       └── prisma/      # Prisma schema and migrations
-└── packages/
-    └── shared/          # Shared types, schemas, enums, constants
-        └── src/
-            ├── types/
-            ├── schemas/
-            ├── enums/
-            └── constants/
+│   ├── api/                  # Express.js REST API
+│   └── mobile/               # React Native (Expo) mobile app
+├── packages/
+│   └── shared/               # Shared types, schemas, enums, constants
+├── package.json              # Workspace root
+└── README.md
 ```
 
-## Prerequisites
+The `@garnish/shared` package is consumed by both `@garnish/api` and `@garnish/mobile`, ensuring type safety and validation consistency across the stack.
 
-- **Node.js** >= 18
-- **npm** >= 9
-- **PostgreSQL** running locally or remotely
-- **Expo CLI** (`npx expo`)
-- **Expo Go** app on your mobile device (or Android/iOS simulator)
+---
 
 ## Getting Started
 
-### 1. Install Dependencies
+### Prerequisites
+
+- Node.js v18+
+- PostgreSQL database (Neon, Supabase, or local)
+- Android Emulator or iOS Simulator
+
+### Installation
 
 ```bash
+# Install dependencies (from project root)
 npm install
+
+# Build the shared package
+cd packages/shared && npm run build && cd ../..
 ```
 
-All workspaces are installed in a single command from the root.
+### Environment Variables
 
-### 2. Set Up Environment Variables
+Create `.env` files for both the API and mobile app:
+
+#### API (`apps/api/.env`)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Runtime environment | `development` |
+| `PORT` | Server port | `3000` |
+| `DATABASE_URL` | PostgreSQL connection string | — |
+| `JWT_SECRET` | Access token signing key | — |
+| `JWT_REFRESH_SECRET` | Refresh token signing key | — |
+| `JWT_EXPIRES_IN` | Access token lifetime | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token lifetime | `7d` |
+| `CORS_ORIGIN` | Allowed origins (comma-separated or `*`) | `*` |
+
+#### Mobile (`apps/mobile/.env`)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `EXPO_PUBLIC_API_URL` | Backend API base URL | `http://192.168.1.5:3000/api/v1` |
+| `EXPO_PUBLIC_SENTRY_DSN` | Sentry error tracking DSN | — |
+
+### Database Setup
 
 ```bash
-# API
-cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env with your PostgreSQL connection string and JWT secrets
+cd apps/api
 
-# Mobile
-cp apps/mobile/.env.example apps/mobile/.env
-# Edit apps/mobile/.env with your API URL and Sentry DSN
-```
+# Push schema to database
+npx prisma db push
 
-### 3. Set Up the Database
-
-```bash
-# Generate Prisma client
+# Generate Prisma Client
 npm run db:generate
 
-# Push schema to database (development)
-npm run db:push
-
-# Or create a migration (production)
-npm run db:migrate -w @garnish/api
+# Seed demo data (optional)
+npm run db:seed
 ```
 
-### 4. Start the API Server
+### Running the App
 
 ```bash
-npm run api
+# Start the API server (from apps/api)
+npm run dev
+
+# Start the mobile app (from apps/mobile)
+npx expo start
 ```
 
-The API will start at `http://localhost:3000`. Health check: `GET /api/health`
+> **Note:** Stop the API server before running `prisma generate` to avoid file lock errors on Windows. The Prisma query engine DLL cannot be overwritten while the server process holds it.
 
-### 5. Start the Mobile App
+---
 
-```bash
-npm run mobile
-```
+## Scripts
 
-Scan the QR code with Expo Go, or press `a` for Android / `i` for iOS simulator.
-
-## Available Scripts
+### API (`apps/api`)
 
 | Script | Description |
 |--------|-------------|
-| `npm run mobile` | Start Expo dev server |
-| `npm run mobile:android` | Start on Android |
-| `npm run mobile:ios` | Start on iOS |
-| `npm run api` | Start Express API in dev mode |
-| `npm run api:build` | Build API for production |
-| `npm run db:generate` | Generate Prisma client |
-| `npm run db:push` | Push Prisma schema to database |
+| `npm run dev` | Start dev server with hot reload (tsx watch) |
+| `npm run build` | Compile TypeScript |
+| `npm start` | Run compiled output |
+| `npm run db:generate` | Generate Prisma Client |
+| `npm run db:push` | Push schema to database |
+| `npm run db:migrate` | Create and apply migration |
 | `npm run db:studio` | Open Prisma Studio |
+| `npm run db:seed` | Seed demo data |
+
+---
+
+## Architecture Overview
+
+### API
+
+Modular architecture — each resource (auth, products, cart, orders) has its own folder under `src/modules/` with route, controller, service, and validation files.
+
+```
+src/
+├── config/env.ts           # Zod-validated environment variables
+├── libs/prisma.ts          # Singleton PrismaClient
+├── middlewares/             # Auth, validation, error handling
+├── modules/
+│   ├── auth/               # Register, login, refresh, me
+│   ├── cart/               # Persistent user cart (CRUD)
+│   ├── orders/             # Order creation with server-side pricing
+│   ├── products/           # Product listing and detail
+│   ├── categories/         # Category listing
+│   ├── restaurants/        # Restaurant listing
+│   ├── users/              # User profile
+│   └── addresses/          # Delivery addresses
+└── utils/                  # JWT, bcrypt, ApiError helpers
+```
+
+### Mobile
+
+File-based routing with Expo Router. Zustand for client state (auth, cart), React Query for server state (products, categories).
+
+```
+app/
+├── (auth)/                 # Sign in, sign up (protected by auth layout)
+├── (tabs)/                 # Home, search, cart, profile (tab navigation)
+├── product/[id].tsx        # Product detail with toppings/sides
+├── login-success.tsx       # Post-login confirmation
+└── _layout.tsx             # Root layout (fonts, providers, auth restore)
+
+src/
+├── components/             # Shared + UI components
+├── services/               # API client and service modules
+├── store/                  # Zustand stores (auth, cart)
+├── constants/              # Image imports, option maps
+└── theme/                  # Design tokens
+```
+
+### Key Flows
+
+- **Auth:** JWT access + refresh tokens, secure storage, automatic refresh on 401
+- **Cart:** Backend-persisted, survives logout/login cycles, optimistic UI updates
+- **Orders:** Server-side price validation, nested Prisma writes
+- **Tab Bar Badge:** Real-time cart item count from Zustand store
+
+---
 
 ## API Endpoints
 
+All endpoints are prefixed with `/api/v1/`.
+
 | Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/health` | No | Health check |
-| POST | `/api/v1/auth/register` | No | Register user |
-| POST | `/api/v1/auth/login` | No | Login |
-| POST | `/api/v1/auth/refresh` | No | Refresh token |
-| GET | `/api/v1/auth/me` | Yes | Get current user |
-| GET | `/api/v1/restaurants` | Yes | List restaurants |
-| GET | `/api/v1/categories` | Yes | List categories |
-| GET | `/api/v1/products` | Yes | List/search products |
-| GET | `/api/v1/products/:id` | Yes | Product detail |
-| GET | `/api/v1/orders` | Yes | List orders |
-| GET | `/api/v1/addresses` | Yes | List addresses |
+|--------|------|:----:|-------------|
+| POST | `/auth/register` | — | Register |
+| POST | `/auth/login` | — | Login |
+| POST | `/auth/refresh` | — | Refresh tokens |
+| GET | `/auth/me` | Yes | Current user |
+| GET | `/products` | — | List products (filters: search, categoryId) |
+| GET | `/products/:id` | — | Product detail |
+| GET | `/categories` | — | List categories |
+| GET | `/restaurants` | — | List restaurants |
+| GET | `/cart` | Yes | Get cart |
+| POST | `/cart/add` | Yes | Add to cart |
+| PUT | `/cart/update` | Yes | Update quantity |
+| DELETE | `/cart/:productId` | Yes | Remove from cart |
+| DELETE | `/cart` | Yes | Clear cart |
+| POST | `/orders` | Yes | Create order |
+| GET | `/orders` | Yes | List orders |
+| GET | `/orders/:id` | Yes | Order detail |
+| GET | `/addresses` | Yes | List addresses |
+| POST | `/addresses` | Yes | Add address |
+| PATCH | `/addresses/:id` | Yes | Update address |
+| DELETE | `/addresses/:id` | Yes | Delete address |
 
-## Architecture Decisions
+---
 
-- **npm workspaces** for monorepo management with Turborepo for task orchestration
-- **Expo Router** (file-based routing) for mobile navigation
-- **NativeWind/Tailwind** for styling (already established in the project)
-- **Zustand** for global state (auth, cart)
-- **Axios** with interceptors for API communication (auto token refresh)
-- **expo-secure-store** for secure token storage on device
-- **Prisma** as the ORM with PostgreSQL
-- **Zod** for shared validation between frontend and backend
-- **Module-based** API architecture (each module: route → controller → service)
-- **JWT** with access + refresh token pattern
+## Documentation
+
+- [Full-Stack Architecture](./docs/full-stack-architecture.md) — System overview and data flows
+- [Frontend Architecture](./docs/frontend-architecture.md) — Mobile app structure
+- [Backend Architecture](./docs/backend-architecture.md) — API design and patterns
+
+---
 
 ## License
 
-Private
+Private project — not for redistribution.

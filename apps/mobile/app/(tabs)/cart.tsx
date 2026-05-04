@@ -45,7 +45,11 @@ export default function Cart() {
       router.push('/');
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Order could not be created';
+      // Extract the backend's error message from the Axios response if available
+      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+      const message =
+        axiosError?.response?.data?.message ||
+        (error instanceof Error ? error.message : 'Order could not be created');
       Alert.alert('Error', message);
     },
   });

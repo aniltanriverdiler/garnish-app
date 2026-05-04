@@ -1,3 +1,15 @@
+/**
+ * Auth modülü route tanımları.
+ * Kimlik doğrulama ile ilgili tüm endpoint'ler burada tanımlanır.
+ * Validation middleware'i ile gelen veri doğrulanır, ardından controller'a yönlendirilir.
+ *
+ * Endpoint'ler:
+ *   POST /register  — Yeni kullanıcı kaydı (body: registerSchema)
+ *   POST /login     — Giriş (body: loginSchema)
+ *   POST /refresh   — Token yenileme
+ *   GET  /me        — Giriş yapan kullanıcının bilgileri (authenticate gerekli)
+ */
+
 import { Router } from "express";
 import { validate } from "../../middlewares/validation.middleware";
 import { authenticate } from "../../middlewares/auth.middleware";

@@ -24,7 +24,7 @@ const SignIn = () => {
       const { user } = await authService.login(email, password);
       setUser(user);
       setIsAuthenticated(true);
-      router.replace('/');
+      router.replace('/login-success');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'An error occurred';
       Alert.alert('Error', message);

@@ -1,6 +1,15 @@
+/**
+ * Auth modülü HTTP handler'ları (controller katmanı).
+ * Route tanımlarından gelen request'leri karşılar, service katmanına iletir
+ * ve sonucu uygun HTTP yanıtı olarak döner.
+ * İş mantığı içermez — sadece HTTP → service → HTTP dönüşümü yapar.
+ * Hatalar next(error) ile error middleware'e iletilir.
+ */
+
 import { Request, Response, NextFunction } from "express";
 import * as authService from "./auth.service";
 
+// Handles POST /register
 export async function register(
   req: Request,
   res: Response,
@@ -18,6 +27,7 @@ export async function register(
   }
 }
 
+// Handles POST /login
 export async function login(
   req: Request,
   res: Response,
@@ -35,6 +45,7 @@ export async function login(
   }
 }
 
+// Handles POST /refresh
 export async function refreshToken(
   req: Request,
   res: Response,
@@ -61,6 +72,7 @@ export async function refreshToken(
   }
 }
 
+// Handles GET /me
 export async function getMe(
   req: Request,
   res: Response,

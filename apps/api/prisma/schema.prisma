@@ -57,6 +57,7 @@ model User {
   addresses Address[]
   orders    Order[]
   favorites Favorite[]
+  cart      Cart?
 
   @@index([email])
   @@map("users")
@@ -135,6 +136,7 @@ model Product {
   options    ProductOption[]
   orderItems OrderItem[]
   favorites  Favorite[]
+  cartItems  CartItem[]
 
   @@index([restaurantId])
   @@index([categoryId])
@@ -210,6 +212,50 @@ model OrderItemOption {
 
   @@index([orderItemId])
   @@map("order_item_options")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@index([userId])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options CartItemOption[]
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model CartItemOption {
+  id         String     @id @default(uuid())
+  cartItemId String
+  optionId   String
+  name       String
+  price      Float
+  type       OptionType
+
+  cartItem CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+
+  @@index([cartItemId])
+  @@map("cart_item_options")
 }
 
 model Favorite {

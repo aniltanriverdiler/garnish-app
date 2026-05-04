@@ -1,3 +1,16 @@
+/**
+ * JWT kimlik doğrulama (authentication) ve rol yetkilendirme (authorization) middleware'leri.
+ *
+ * authenticate: Gelen request'teki Authorization header'dan Bearer token'ı çıkarır,
+ * JWT olarak doğrular, token içindeki userId ile veritabanından kullanıcıyı çeker
+ * ve req.user objesine atar. Auth gerektiren tüm route'larda kullanılır.
+ *
+ * requireRole: authenticate'den sonra çalışır. Kullanıcının rolünü kontrol eder,
+ * yeterli yetkisi yoksa 403 Forbidden döner. Admin paneli gibi kısıtlı route'lar için.
+ *
+ * Ayrıca Express Request arayüzünü global olarak genişleterek req.user tipini tanımlar.
+ */
+
 import { Request, Response, NextFunction } from "express";
 import { UserRole } from "@prisma/client";
 import { prisma } from "../libs/prisma";
@@ -11,6 +24,7 @@ export interface AuthenticatedUser {
   role: UserRole;
 }
 
+// Extend Express Request to include user property
 declare global {
   namespace Express {
     interface Request {
@@ -19,6 +33,7 @@ declare global {
   }
 }
 
+// Verifies JWT token and attaches user to request
 export async function authenticate(
   req: Request,
   _res: Response,
@@ -45,6 +60,7 @@ export async function authenticate(
     req.user = user;
     next();
   } catch (error) {
+    // Map specific JWT errors to user-friendly messages
     next(error instanceof Error && error.name === "JsonWebTokenError"
       ? unauthorized("Invalid token")
       : error instanceof Error && error.name === "TokenExpiredError"
@@ -53,6 +69,7 @@ export async function authenticate(
   }
 }
 
+// Checks if authenticated user has one of the required roles
 export function requireRole(...roles: UserRole[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {

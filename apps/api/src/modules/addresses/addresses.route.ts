@@ -1,3 +1,19 @@
+/**
+ * Adres (address) modülü route tanımları.
+ * Kullanıcının teslimat adreslerinin CRUD işlemlerini sağlar.
+ * Tüm endpoint'ler authenticate middleware'i gerektirir.
+ * Adresler kullanıcıya bağlıdır — bir kullanıcı sadece kendi adreslerini görebilir/değiştirebilir.
+ *
+ * Endpoint'ler:
+ *   GET    /      — Kullanıcının adreslerini listele
+ *   POST   /      — Yeni adres ekle (body: createAddressSchema)
+ *   PATCH  /:id   — Adresi güncelle (kısmi güncelleme)
+ *   DELETE /:id   — Adresi sil
+ *
+ * updateMany ve deleteMany kullanılır — where koşulunda userId kontrolü
+ * yapılarak başka kullanıcının adresine erişim engellenir (authorization).
+ */
+
 import { Router, Request, Response, NextFunction } from "express";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { validate } from "../../middlewares/validation.middleware";
@@ -6,7 +22,7 @@ import { prisma } from "../../libs/prisma";
 
 const router = Router();
 
-// Get all addresses
+// GET / — list user's addresses
 router.get("/", authenticate, async (req: Request, res: Response) => {
   const addresses = await prisma.address.findMany({
     where: { userId: req.user!.id },
@@ -15,7 +31,7 @@ router.get("/", authenticate, async (req: Request, res: Response) => {
   res.json({ success: true, data: addresses });
 });
 
-// Create a new address
+// POST / — create a new address
 router.post(
   "/",
   authenticate,
@@ -35,7 +51,7 @@ router.post(
   },
 );
 
-// Update an address
+// PATCH /:id — update an address (partial)
 router.patch(
   "/:id",
   authenticate,
@@ -57,7 +73,7 @@ router.patch(
   },
 );
 
-// Delete an address by id
+// DELETE /:id — delete an address
 router.delete(
   "/:id",
   authenticate,

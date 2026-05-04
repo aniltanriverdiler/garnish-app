@@ -1,3 +1,17 @@
+/**
+ * Kullanıcı (user) modülü route tanımları.
+ * Kullanıcı profili görüntüleme ve güncelleme endpoint'lerini sağlar.
+ * Tüm endpoint'ler authenticate middleware'i gerektirir.
+ *
+ * Endpoint'ler:
+ *   GET  /     — Tüm kullanıcıları listele (admin kullanımı)
+ *   GET  /me   — Giriş yapan kullanıcının profili (adresler dahil)
+ *   PATCH /me  — Profil güncelleme (e-posta benzersizlik kontrolü ile)
+ *
+ * Profil güncellemede req.body doğrudan Prisma update'e gönderilir
+ * çünkü validate middleware'i updateUserSchema ile filtreleme yapar.
+ */
+
 import { Router, Request, Response, NextFunction } from "express";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { prisma } from "../../libs/prisma";
@@ -7,7 +21,7 @@ import { conflict } from "../../utils/api-error";
 
 const router = Router();
 
-// Get all users
+// GET / — list all users
 router.get("/", authenticate, async (_req: Request, res: Response) => {
   const users = await prisma.user.findMany({
     select: {
@@ -24,7 +38,7 @@ router.get("/", authenticate, async (_req: Request, res: Response) => {
   res.json({ success: true, data: users });
 });
 
-// Get user profile by id
+// GET /me — current user's profile with addresses
 router.get("/me", authenticate, async (req: Request, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.id },
@@ -48,13 +62,14 @@ router.get("/me", authenticate, async (req: Request, res: Response) => {
   res.json({ success: true, data: user });
 });
 
-// Update user profile
+// PATCH /me — update current user's profile
 router.patch(
   "/me",
   authenticate,
   validate({ body: updateUserSchema }),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Check email uniqueness if email is being changed
       if (req.body.email) {
         const existing = await prisma.user.findFirst({
           where: {

@@ -4,6 +4,7 @@ import { images } from '@/constants';
 
 interface CartItemData {
   id: string;
+  productId: string;
   name: string;
   price: number;
   image: string;
@@ -38,11 +39,11 @@ const CartItem = ({ item }: { item: CartItemData }) => {
 
         {/* Quantity Controls */}
         <View className="flex-row items-center gap-4">
-          <TouchableOpacity onPress={() => decreaseQty(item.id)}>
+          <TouchableOpacity onPress={() => decreaseQty(item.productId)}>
             <Image source={images.minus} className="size-4" resizeMode="contain" />
           </TouchableOpacity>
           <Text className="font-quicksand-bold text-base text-dark-100">{item.quantity}</Text>
-          <TouchableOpacity onPress={() => increaseQty(item.id)}>
+          <TouchableOpacity onPress={() => increaseQty(item.productId)}>
             <Image
               source={images.plus}
               className="size-4"
@@ -54,7 +55,7 @@ const CartItem = ({ item }: { item: CartItemData }) => {
       </View>
 
       {/* Delete */}
-      <TouchableOpacity onPress={() => removeItem(item.id)} className="ml-2 p-1">
+      <TouchableOpacity onPress={() => removeItem(item.productId)} className="ml-2 p-1">
         <Image source={images.trash} className="size-5" tintColor="#F14141" resizeMode="contain" />
       </TouchableOpacity>
     </View>

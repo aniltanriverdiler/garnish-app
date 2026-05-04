@@ -1,19 +1,27 @@
 import { Redirect, Tabs } from 'expo-router';
 import useAuthStore from '@/store/auth-store';
+import useCartStore from '@/store/cart-store';
 import { TabBarIconProps } from '@/types';
 import { Image, Text, View } from 'react-native';
 import { images } from '@/constants';
 import cn from 'clsx';
 
-const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
+const TabBarIcon = ({ focused, icon, title, badge }: TabBarIconProps & { badge?: number }) => (
   <View className="tab-icon">
-    <Image
-      source={icon}
-      className="size-7"
-      resizeMode="contain"
-      tintColor={focused ? '#FE8C00' : '#5D5F6D'}
-    />
-    <Text className={cn(`text-sm font-bold`, focused ? 'text-primary' : 'text-gray-200')}>
+    <View>
+      <Image
+        source={icon}
+        className="size-7"
+        resizeMode="contain"
+        tintColor={focused ? '#FE8C00' : '#5D5F6D'}
+      />
+      {badge !== undefined && badge > 0 && (
+        <View className="absolute -right-2 -top-1 min-w-[18px] items-center justify-center rounded-full bg-primary px-1 py-0.5">
+          <Text className="text-center text-[10px] font-bold text-white">{badge}</Text>
+        </View>
+      )}
+    </View>
+    <Text className={cn('text-sm font-bold', focused ? 'text-primary' : 'text-gray-200')}>
       {title}
     </Text>
   </View>
@@ -21,6 +29,7 @@ const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
 
 export default function TabsLayout() {
   const { isAuthenticated } = useAuthStore();
+  const totalItems = useCartStore((s) => s.getTotalItems());
 
   if (!isAuthenticated) return <Redirect href="/sign-in" />;
 
@@ -69,7 +78,7 @@ export default function TabsLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon title="Cart" icon={images.bag} focused={focused} />
+            <TabBarIcon title="Cart" icon={images.bag} focused={focused} badge={totalItems} />
           ),
         }}
       />

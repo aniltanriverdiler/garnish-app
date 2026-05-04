@@ -1,3 +1,12 @@
+/**
+ * Zod şema doğrulama middleware'i.
+ * Route handler'lardan önce çalışır ve request body/query/params verilerini
+ * belirtilen Zod şemasına karşı doğrular.
+ * Geçersiz veri geldiğinde ZodError fırlatır, bu hata error.middleware tarafından
+ * alan bazlı mesajlarla 400 yanıtına dönüştürülür.
+ * Başarılı parse sonucu req.body/query/params üzerine yazılır (strip + transform uygulanır).
+ */
+
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema } from "zod";
 
@@ -7,6 +16,7 @@ interface ValidationSchemas {
   params?: ZodSchema;
 }
 
+// Validates request data against provided Zod schemas
 export function validate(schemas: ValidationSchemas) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     try {

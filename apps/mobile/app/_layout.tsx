@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import * as Sentry from '@sentry/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import useAuthStore from '@/store/auth-store';
+import useCartStore from '@/store/cart-store';
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -25,7 +26,8 @@ const queryClient = new QueryClient({
 });
 
 export default Sentry.wrap(function RootLayout() {
-  const { isLoading } = useAuthStore();
+  const { isLoading, isAuthenticated, fetchAuthenticatedUser } = useAuthStore();
+  const fetchCart = useCartStore((s) => s.fetchCart);
 
   const [fontsLoaded, error] = useFonts({
     'Quicksand-Bold': require('../assets/fonts/Quicksand-Bold.ttf'),
@@ -39,6 +41,14 @@ export default Sentry.wrap(function RootLayout() {
     if (error) throw error;
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
+
+  useEffect(() => {
+    fetchAuthenticatedUser();
+  }, [fetchAuthenticatedUser]);
+
+  useEffect(() => {
+    if (isAuthenticated) fetchCart();
+  }, [isAuthenticated, fetchCart]);
 
   if (!fontsLoaded && isLoading) return null;
 
